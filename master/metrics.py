@@ -4,6 +4,7 @@
 
 import threading
 import time
+import pandas as pd
 from collections import defaultdict
 from common.models import Response, RequestStatus
 from common.logger import get_logger
@@ -80,3 +81,25 @@ class MetricsCollector:
         for wid, cnt in sorted(s["worker_distribution"].items()):
             log.info("    Worker-%-2d : %4d requests", wid, cnt)
         log.info(sep + "\n")
+    def export_to_excel(self, scenario_name):
+        s = self.snapshot()
+        
+        # Prepare the summary data
+        summary_data = {
+            "Metric": ["Total Requests", "Success Rate (%)", "Throughput (req/s)", "Avg Latency (ms)", "P95 Latency (ms)"],
+            "Value": [s["total_requests"], s["success_rate_pct"], s["throughput_rps"], s["latency_avg_ms"], s["latency_p95_ms"]]
+        }
+        
+        # Prepare worker distribution data
+        dist_data = {"Worker": [], "Requests": []}
+        for wid, cnt in s["worker_distribution"].items():
+            dist_data["Worker"].append(f"Worker-{wid}")
+            dist_data["Requests"].append(cnt)
+
+        # Write to Excel
+        filename = f"Results_{scenario_name.replace(' ', '_')}.xlsx"
+        with pd.ExcelWriter(filename) as writer:
+            pd.DataFrame(summary_data).to_excel(writer, sheet_name="Summary", index=False)
+            pd.DataFrame(dist_data).to_excel(writer, sheet_name="Distribution", index=False)
+        
+        print(f"Metrics exported to {filename}")    

@@ -21,7 +21,7 @@ from common.logger          import get_logger
 log = get_logger("Main")
 
 NUM_WORKERS        = 4      # simulated GPU nodes
-NUM_USERS          = 1000  # concurrent users per scenario
+NUM_USERS          = 10  # concurrent users per scenario
 FAULT_USERS        = 200   # users for the fault-tolerance scenario
 HEARTBEAT_INTERVAL = 2.0   # seconds between health checks
 
@@ -55,6 +55,7 @@ def run_scenario(
         monitor.stop()
 
     metrics.print_report()
+    metrics.export_to_excel(title)
 
     # clean up worker processes for this scenario before starting the next
     for w in workers:
