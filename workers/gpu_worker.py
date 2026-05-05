@@ -14,6 +14,7 @@
 import time
 import random
 import threading
+import queue
 import multiprocessing as mp
 from multiprocessing import Process, Queue
 from common.models import Request, Response, RequestStatus, WorkerStatus, WorkerMetrics
@@ -372,16 +373,30 @@ class ProcessWorkerHandle:
     def process(self, request: Request) -> Response:
         """
         Send request to the worker process and block until the response arrives.
-        Raises RuntimeError if the worker is dead or if it returns a FAILED response
-        (so the LoadBalancer retry logic works unchanged).
+        Raises RuntimeError if the worker is dead or if it returns a FAILED response.
         """
         if not self.is_alive:
             raise RuntimeError(
                 f"Worker-{self.worker_id} process is dead. "
                 "Cannot accept new requests."
             )
+        
         self._task_q.put(request)
-        response: Response = self._result_q.get()   # blocks
+        
+        # --- THE FIX: Polling with a timeout ---
+        while True:
+            try:
+                # Wait 1 second for a response
+                response: Response = self._result_q.get(timeout=1.0)
+                break  # We got the response, break the loop
+            except queue.Empty:
+                # If 1 second passed with no response, check if the OS process actually died
+                if not self.is_alive:
+                    raise RuntimeError(
+                        f"Worker-{self.worker_id} crashed while request {request.request_id} was waiting in the queue."
+                    )
+        # ---------------------------------------
+        
         self._drain_metrics()
 
         if response.status == RequestStatus.FAILED:
