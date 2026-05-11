@@ -20,9 +20,10 @@ from common.logger          import get_logger
 
 log = get_logger("Main")
 
-NUM_WORKERS        = 4      # simulated GPU nodes
-NUM_USERS          = 10  # concurrent users per scenario
-FAULT_USERS        = 200   # users for the fault-tolerance scenario
+
+NUM_WORKERS        = 4
+NUM_USERS          = 1000
+FAULT_USERS        = 1000     
 HEARTBEAT_INTERVAL = 2.0   # seconds between health checks
 
 
