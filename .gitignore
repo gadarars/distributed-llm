@@ -1,0 +1,36 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.egg
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project outputs – keep xlsx files committed as evidence
+# (comment out the lines below if you want to exclude them)
+# *.xlsx
+
+# Logs
+*.log
+
+# FAISS build artifacts (keep index and pkl — they are pre-built and needed)
+# rag/knowledge_base.index
+# rag/documents.pkl
